@@ -1,0 +1,16 @@
+#!/usr/bin/python3
+
+from kubernetes import client, config
+import argparse 
+
+parser = argparse.ArgumentParser(description="help get pods in namepsaces in efficient ways")
+
+parser.add_argument('namespace', type=str, default="default", help="provide namespace you want pods from otherwise default would be picked by default.")
+
+args = parser.parse_args()
+config.load_kube_config()
+v1 = client.CoreV1Api()    
+print("Listing pods with their IPs:")
+ret_pods_from_given_namespace = v1.list_namespaced_pod(namespace=args.namespace)
+for i in ret_pods_from_given_namespace.items:
+    print("%s\t%s\t%s" % (i.status.pod_ip, i.metadata.name))
