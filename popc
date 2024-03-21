@@ -1,0 +1,29 @@
+#!/usr/bin/python3
+
+from kubernetes import client, config
+from rich.table import Table
+from rich.console import Console
+import argparse 
+
+console = Console()
+
+table = Table(title="popc (pods python client)")
+
+table.add_column("Pods IP", justify="right", style="cyan", no_wrap=True)
+table.add_column("Pods Name", style="green", justify="left")
+table.add_column("Pods Image", style="blue")
+table.add_column("Resource Version", style="red")
+
+parser = argparse.ArgumentParser(description="help get pods in namepsaces in efficient ways")
+
+parser.add_argument('namespace', type=str, default="default", help="provide namespace you want pods from otherwise default would be picked by default.")
+
+args = parser.parse_args()
+config.load_kube_config()
+v1 = client.CoreV1Api()    
+print("Listing pods with their IPs:")
+ret_pods_from_given_namespace = v1.list_namespaced_pod(namespace=args.namespace)
+for i in ret_pods_from_given_namespace.items:
+    table.add_row(i.status.pod_ip, i.metadata.name, i.spec.containers[0].image, str(i.metadata.resource_version))
+    
+console.print(table)
